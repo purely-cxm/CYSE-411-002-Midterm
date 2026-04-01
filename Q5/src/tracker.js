@@ -21,7 +21,11 @@ let currentFilter = "all";
 
 
 function loadDashboardState() {
-    const raw   = localStorage.getItem("dashboardState");
+    const raw = localStorage.getItem("dashboardState");
+    // try{
+    //     const state = JSON.parse(raw);            
+    // } catch (error) {
+    // }
     const state = JSON.parse(raw);             // No try/catch
     currentFilter = state.filter;              // No enum validation
     applyFilter(currentFilter);
@@ -55,9 +59,18 @@ function saveDashboardState() {
 
 
 async function fetchIncidents() {
-    const res  = fetch("/api/incidents");      // Missing await
-    const data = res.json();                   // Missing await; res is a Promise
-    return data;
+    try{
+        const res  = await fetch("/api/incidents");      // Missing await
+        if(!res.ok){
+            console.error("Error Fetching: Error Code " + res);
+            return null
+        }
+        const data = await res.json();                   // Missing await; res is a Promise
+        return data;
+    } catch (e){
+        console.log("Network Error: " + e)
+    }
+    
 }
 
 
@@ -76,13 +89,26 @@ function renderIncidents(incidents) {
     container.innerHTML = "";                  // Clear previous results
 
     incidents.forEach(function (incident) {
-        const item = document.createElement("li");
-        // UNSAFE – directly inserts API response as HTML
-        item.innerHTML =
-            "<strong>" + incident.title + "</strong>" +
-            " <span class='severity severity-" + incident.severity + "'>" +
-            incident.severity + "</span>";
-        container.appendChild(item);
+        if(!incident.title || incident.severity !== ACCEPTED_SEVERITIES){
+            console.error("Invalid Title or Severity Detected");
+        }
+        try{
+            const item_title = document.createElement("li");
+            const item_severity = document.createElement("li")
+            item_title.textContent = incident.title
+            item_severity.textContent = incident.severity
+        }catch(e){
+            console.error(e);
+        }
+        
+        container.appendChild(item_title)
+        container.appendChild(item_severity)
+        // // UNSAFE – directly inserts API response as HTML
+        // item.innerText =
+        //     "<strong>" + incident.title + "</strong>" +
+        //     " <span class='severity severity-" + incident.severity + "'>" +
+        //     incident.severity + "</span>";
+        // container.appendChild(item);
     });
 }
 
