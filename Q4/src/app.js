@@ -16,9 +16,12 @@ function loadSession() {
 //  allowing any HTML or script tags in the message to
 //  execute in the viewer's browser (stored XSS).
 
-
+//DONE!!
 function renderStatusMessage(containerElement, message) {
-    containerElement.innerHTML = "<p>" + message + "</p>";   // UNSAFE
+    p = document.createElement("p")
+    p.textContent = message
+    containerElement.appendChild(p)
+    // containerElement.innerHTML = "<p>" + message + "</p>";   // UNSAFE
 }
 
 
@@ -28,7 +31,7 @@ function renderStatusMessage(containerElement, message) {
 //  VULNERABILITY: The raw input is used directly with no
 //  character filtering, no length limit, and no trimming.
 
-
+//DONE!!
 function sanitizeSearchQuery(input) {
     // TODO: Implement sanitization.
     // Requirements:
@@ -36,13 +39,19 @@ function sanitizeSearchQuery(input) {
     //   - Trim leading/trailing whitespace before processing
     //   - Max 40 characters
     //   - Return null if the result is empty after sanitization
-    return input;   // UNSAFE – returns raw input unchanged
+    const white_space_removed = input.replace(/[" "]/g,'')
+    const sanitized = white_space_removed.replace(/[^A-Za-z0-9" "_-]/g, "_")
+    if(sanitized === null){
+        return null;
+    }
+    return sanitized.substring(0,40)
+    // return input;   // UNSAFE – returns raw input unchanged
 }
 
 function performSearch(query) {
     const sanitized = sanitizeSearchQuery(query);
     const label = document.getElementById("search-label");
-    label.innerHTML = "Showing results for: " + sanitized;  // UNSAFE
+    label.innerText = "Showing results for: " + sanitized;  // UNSAFE
 }
 
 
@@ -97,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
         statusContainer.className = "status";
 
         // Q4.A – fix this call
+        
         renderStatusMessage(statusContainer, profile.status);
 
         card.appendChild(nameEl);
